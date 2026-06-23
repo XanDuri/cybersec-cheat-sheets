@@ -14,6 +14,7 @@ Every command comes with an **example** and a **plain-English description** of w
 | Tool | What it's for |
 | --- | --- |
 | [**nmap**](./nmap) | Network mapping, port scanning, service & OS detection |
+| [**seclists**](./seclists) | Wordlists for brute-forcing & fuzzing (the fuel for the tools below) |
 
 ### 📡 Network & Packet Analysis
 | Tool | What it's for |
@@ -46,7 +47,7 @@ Every command comes with an **example** and a **plain-English description** of w
 | --- | --- |
 | [**smb**](./smb) | SMB/Windows enumeration (enum4linux, smbclient, rpcclient) |
 | [**metasploit**](./metasploit) | Exploitation framework + msfvenom + searchsploit |
-| [**reverse-shells**](./reverse-shells) | Reverse shell one-liners & shell stabilisation |
+| [**shells**](./shells) | Reverse **and** bind shells (netcat, bash, socat) + shell stabilisation |
 
 ### 🔵 Blue Team / SOC
 | Tool | What it's for |
