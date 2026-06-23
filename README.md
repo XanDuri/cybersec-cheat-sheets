@@ -6,6 +6,9 @@ Every command comes with an **example** and a **plain-English description** of w
 
 > ⚠️ **For authorized testing and learning only.** Use these tools exclusively on systems you own or have explicit written permission to test. Unauthorized access to computer systems is illegal.
 
+![License](https://img.shields.io/github/license/XanDuri/cybersec-cheat-sheets)
+![Last commit](https://img.shields.io/github/last-commit/XanDuri/cybersec-cheat-sheets)
+![Stars](https://img.shields.io/github/stars/XanDuri/cybersec-cheat-sheets?style=social)
 ---
 
 ## 📂 Contents
