@@ -1,4 +1,7 @@
 # 🛡️ Cybersecurity & Pentesting Cheat Sheets
+![License](https://img.shields.io/github/license/XanDuri/cybersec-cheat-sheets)
+![Last commit](https://img.shields.io/github/last-commit/XanDuri/cybersec-cheat-sheets)
+![Stars](https://img.shields.io/github/stars/XanDuri/cybersec-cheat-sheets?style=social)
 
 A collection of clean, practical cheat sheets for the security tools you actually use — built while working through TryHackMe rooms and home labs. Each tool lives in its own folder with a dedicated `README.md` so you can jump straight to what you need.
 
