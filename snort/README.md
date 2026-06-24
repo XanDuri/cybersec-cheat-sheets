@@ -93,6 +93,48 @@ alert icmp any any -> any any (msg:"ICMP ping detected"; sid:1000003; rev:1;)
 | `flags` | `flags:S;` | Match TCP flags (S=SYN, A=ACK, F=FIN…) |
 | `flow` | `flow:to_server,established;` | Match connection state/direction |
 
+## Detecting Repeated Events (`detection_filter`)
+
+The `detection_filter` option only fires after N matches in M seconds — essential for catching scans and brute-force without alerting on every single packet.
+
+```text
+... (detection_filter:track by_src, count <N>, seconds <M>; sid:...;)
+```
+
+---
+
+## 🔎 Detection rules for common anomalies
+
+```text
+# Port scan — 20+ SYNs from one source in 5s
+alert tcp any any -> $HOME_NET any (msg:"Possible TCP SYN port scan"; \
+  flags:S; detection_filter:track by_src, count 20, seconds 5; \
+  sid:1000010; rev:1;)
+
+# NULL scan — illegal packet with no flags set
+alert tcp any any -> $HOME_NET any (msg:"NULL scan detected"; \
+  flags:0; sid:1000011; rev:1;)
+
+# SSH brute-force — 5+ new connections to 22 in 60s
+alert tcp any any -> $HOME_NET 22 (msg:"Possible SSH brute-force"; \
+  flow:to_server; flags:S; detection_filter:track by_src, count 5, seconds 60; \
+  sid:1000012; rev:1;)
+
+# ICMP tunnelling / exfil — oversized ping payloads
+alert icmp any any -> any any (msg:"Large ICMP payload (possible tunnel)"; \
+  dsize:>800; sid:1000013; rev:1;)
+
+# Reverse-shell beacon — outbound to a classic Metasploit port
+alert tcp $HOME_NET any -> any 4444 (msg:"Possible reverse shell to 4444"; \
+  flow:to_server,established; sid:1000014; rev:1;)
+
+# Cleartext password seen in payload
+alert tcp any any -> any any (msg:"Cleartext password in traffic"; \
+  content:"password"; nocase; sid:1000015; rev:1;)
+```
+
+> 🔗 The same anomalies in tcpdump / Wireshark / Splunk: see [DETECTION.md](../DETECTION.md).
+
 ---
 
 ## 🧭 Typical workflow

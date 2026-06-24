@@ -57,3 +57,11 @@ ffuf -u http://10.10.10.1/login -X POST -d "username=admin&password=FUZZ" \
 # GET parameter discovery
 ffuf -u "http://10.10.10.1/page?FUZZ=value" -w params.txt -fs 0
 ```
+
+> 💡 **Gotchas:**
+> - Drowning in noise? Run a baseline first, see the size/word count of the "not found" page, then `-fs`/`-fw` it out — or let `-ac` (auto-calibration) figure it out.
+> - For **vhost** fuzzing the server returns 200 for everything, so filter by **size** (`-fs`), not status code.
+> - `-recursion -recursion-depth 2` walks into discovered directories automatically.
+> - Wordlists live in [seclists](../seclists) (`Discovery/Web-Content/`).
+
+> 🔗 Confirmed an injectable parameter? → [sqlmap](../sqlmap). Want to tamper requests by hand? → [burpsuite](../burpsuite).

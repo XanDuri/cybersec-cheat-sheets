@@ -70,3 +70,11 @@ hydra -L users.txt -P pass.txt -V ftp://10.10.10.1
 hydra -l admin -P rockyou.txt 10.10.10.1 http-post-form \
   "/login:user=^USER^&pass=^PASS^:F=incorrect"
 ```
+
+> 💡 **Gotchas:**
+> - Grab the exact POST body and field names from your browser dev-tools or [burpsuite](../burpsuite) — guessing them is the #1 reason `http-post-form` "finds" nothing or everything.
+> - Online brute-force is **slow & loud** and locks accounts. Check the password policy first (`nxc smb --pass-pol`, see [netexec](../netexec)) and keep `-t` low for SSH.
+> - Use `https-post-form` for TLS sites and `-s <port>` for non-default ports.
+> - Have a hash instead of a live login? Crack it offline with [john](../john)/[hashcat](../hashcat) — far faster.
+
+> 🔗 This is what brute-force looks like to a defender → [DETECTION.md → Brute-force](../DETECTION.md#2-brute-force-login).

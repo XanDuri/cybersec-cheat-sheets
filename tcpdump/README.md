@@ -49,6 +49,42 @@ sudo tcpdump [options] [filter expression]
 
 ---
 
+## 🎯 Filtering by TCP flags (scan detection)
+
+You can match exact flag combinations with `tcp[tcpflags]`. This is the key to spotting scans on the wire.
+
+| Filter | Example | Catches |
+| --- | --- | --- |
+| SYN only | `tcpdump 'tcp[tcpflags] == tcp-syn'` | Connection attempts / **SYN scan** |
+| SYN+ACK | `tcpdump 'tcp[tcpflags] == (tcp-syn\|tcp-ack)'` | Open ports replying |
+| RST | `tcpdump 'tcp[tcpflags] & tcp-rst != 0'` | Closed/refused ports (lots of RST = scan in progress) |
+| NULL scan | `tcpdump 'tcp[tcpflags] == 0'` | Nmap `-sN` (no flags set) |
+| FIN scan | `tcpdump 'tcp[tcpflags] == tcp-fin'` | Nmap `-sF` |
+| Xmas scan | `tcpdump 'tcp[tcpflags] == (tcp-fin\|tcp-push\|tcp-urg)'` | Nmap `-sX` |
+
+## 🔎 Detecting anomalies
+
+```bash
+# Port scan: one source firing SYNs at many ports (watch the dst port column climb)
+sudo tcpdump -nn 'tcp[tcpflags] == tcp-syn'
+
+# Possible reverse shell / C2: outbound to an odd high port
+sudo tcpdump -nn 'dst port 4444 or dst port 1337'
+
+# ICMP tunnelling / exfil: pings with unusually large payloads
+sudo tcpdump -nn 'icmp and greater 100'
+
+# Cleartext credentials crossing the wire (FTP/HTTP/Telnet)
+sudo tcpdump -nn -A 'port 21 or port 80 or port 23' | grep -iE 'user|pass|login'
+
+# DNS exfiltration: abnormally long / frequent queries
+sudo tcpdump -nn -A port 53
+```
+
+> 🔗 Same anomalies, other tools (Wireshark / Snort / Splunk): see [DETECTION.md](../DETECTION.md).
+
+---
+
 ## 🧭 Common one-liners
 
 ```bash
@@ -64,3 +100,5 @@ sudo tcpdump -i eth0 -nn -c 100
 # Read a saved capture and filter for a host
 tcpdump -nn -r capture.pcap host 10.10.10.1
 ```
+
+> 💡 **Gotchas:** quote filter expressions that contain `|` or spaces. `greater N` / `less N` filter by packet length. Without `-w` you only see headers — add `-A`/`-X` for payload.

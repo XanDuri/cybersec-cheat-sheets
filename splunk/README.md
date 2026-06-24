@@ -82,3 +82,37 @@ index=web | timechart count by status
 # Extract usernames from raw logs, then count
 index=auth | rex field=_raw "user=(?<username>\w+)" | stats count by username
 ```
+
+---
+
+## 🔎 Detecting anomalies (threat hunting)
+
+```text
+# Port scan: one src_ip touching many distinct dest_ports
+index=firewall action=blocked
+| stats dc(dest_port) AS ports values(dest_port) AS port_list by src_ip
+| where ports > 20 | sort -ports
+
+# Brute-force then success (likely compromise)
+index=auth (action=failure OR action=success)
+| stats count(eval(action="failure")) AS fails count(eval(action="success")) AS wins by user, src_ip
+| where fails > 10 AND wins > 0
+
+# Data exfiltration: top outbound talkers by bytes
+index=firewall direction=outbound
+| stats sum(bytes_out) AS total by src_ip | sort -total | head 10
+
+# C2 beaconing: near-constant interval between callbacks to one dest
+index=proxy | sort 0 _time | streamstats current=f last(_time) AS prev by src_ip, dest_ip
+| eval gap = _time - prev | stats avg(gap) AS avg stdev(gap) AS jitter count by src_ip, dest_ip
+| where count > 20 AND jitter < 5
+
+# New / rare process (possible malware) — compare to a lookup of known-good
+index=sysmon EventCode=1 | rare 20 Image
+
+# Account created then added to admins shortly after
+index=wineventlog (EventCode=4720 OR EventCode=4732)
+| transaction TargetUserName maxspan=10m | search EventCode=4720 EventCode=4732
+```
+
+> 🔗 The same anomalies in nmap / tcpdump / Wireshark / Snort: see [DETECTION.md](../DETECTION.md).

@@ -112,6 +112,28 @@ nmap [scan type] [options] [target]
 
 ---
 
+## 🔎 Spotting anomalies in results
+
+Nmap isn't only offensive — blue teams use it to baseline a network and catch drift (rogue hosts, surprise open ports, downgraded services).
+
+| Goal | Command | What it tells you |
+| --- | --- | --- |
+| Baseline a network | `nmap -sV -oX baseline.xml 10.10.10.0/24` | Snapshot of every host/port/version to compare against later |
+| **Diff two scans** | `ndiff baseline.xml today.xml` | New hosts, newly-open ports, version changes since the baseline — a classic IOC of compromise |
+| Find odd open ports | `nmap -p- --open 10.10.10.1` | A workstation exposing `4444`, `1337`, `8080`… often = backdoor / reverse-shell listener |
+| Known vulns | `nmap --script vuln 10.10.10.1` | Surfaces CVEs an attacker could already be using |
+| Spot weak/outdated services | `nmap -sV 10.10.10.1` | Old SSH/SMB/Apache versions = likely entry points |
+
+```bash
+# Detect drift: re-scan daily and diff against the baseline
+nmap -sV -oX today.xml 10.10.10.0/24
+ndiff baseline.xml today.xml      # red lines = something changed
+```
+
+> 🔗 To see what *your* scan looks like to a defender (and how it's detected), see [DETECTION.md → Port scanning](../DETECTION.md).
+
+---
+
 ## 🧭 Typical workflow
 
 ```bash
@@ -124,3 +146,5 @@ nmap -p- --min-rate 1000 -T4 10.10.10.1 -oN ports.txt
 # 3. Deep scan on the ports you found
 nmap -sV -sC -p 22,80,443 10.10.10.1 -oN deep.txt
 ```
+
+> 🔗 **Next steps:** found `445`? → [smb](../smb). Found `80/443`? → [gobuster](../gobuster) / [ffuf](../ffuf). Need the right wordlist? → [seclists](../seclists).

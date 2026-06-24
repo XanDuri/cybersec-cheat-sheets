@@ -66,6 +66,26 @@
 
 ---
 
+## 🔎 Detecting anomalies
+
+Display filters that surface common attack patterns in a capture:
+
+| Anomaly | Filter | Why it works |
+| --- | --- | --- |
+| **SYN port scan** | `tcp.flags.syn==1 && tcp.flags.ack==0` | Floods of bare SYNs from one source to many ports |
+| Open ports found | `tcp.flags.syn==1 && tcp.flags.ack==1` | SYN/ACK replies reveal which ports answered |
+| NULL / FIN / Xmas scan | `tcp.flags==0x000` / `tcp.flags.fin==1` | Stealth scans use illegal/empty flag combos |
+| Refused connections | `tcp.flags.reset==1` | A burst of RSTs == many closed ports probed |
+| **ARP spoofing (MITM)** | `arp.duplicate-address-detected` | Two MACs claiming the same IP = poisoning |
+| Cleartext creds | `http.request.method=="POST"` then *Follow → HTTP Stream* | Read submitted usernames/passwords |
+| Possible exfil / C2 | `Statistics → Conversations` → sort by Bytes | One host with huge or oddly periodic outbound flows |
+| DNS tunnelling | `dns.qry.name.len > 40` or `dns && frame.len > 200` | Long, high-entropy subdomains carry smuggled data |
+| SMB attacks | `smb2` / `kerberos` | Spot lateral movement & ticket abuse |
+
+> 🔗 The same anomalies in tcpdump / Snort / Splunk are catalogued in [DETECTION.md](../DETECTION.md).
+
+---
+
 ## 🧭 Useful tricks
 
 - **Follow a stream:** right-click a packet → **Follow → TCP/HTTP Stream** to reconstruct the whole conversation (great for reading cleartext creds).
